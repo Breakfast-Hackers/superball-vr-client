@@ -14,6 +14,7 @@ import {
 
 import Board from './Board.js';
 import Ball from './Ball.js';
+import Timer from './Timer.js';
 import Obstacle from './Obstacle.js';
 import DebugControls from './DebugControls.js';
 
@@ -113,7 +114,8 @@ export default class HelloVRWorld extends React.Component {
     return (
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
-        <Board time={this.state.time} />
+        <Board />
+        <Timer time={this.state.time} />
         <Ball position={this.state.ballPosition} />
         <Obstacle />
         <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
@@ -125,7 +127,7 @@ function milisecondstoSeconds(miliseconds) {
   if ((miliseconds != undefined) && (miliseconds >= 0)) {
     var seconds = ((miliseconds % 60000) / 1000).toFixed(0);
     var minutes = Math.floor(miliseconds / 60000);
-    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+    return (seconds == 60 ? (minutes + 1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
   }
 }
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);

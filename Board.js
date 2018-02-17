@@ -18,13 +18,7 @@ class Board extends React.Component {
           transform: [{ translate: [0, 0, -3] }]
         }}
       />
-      <Text style={{
-        fontSize: 0.1,
-        textAlignVertical: 'center',
-        transform: [{ translate: [0, 1.5, -3] }]
-      }} >
-        {this.props.time}
-      </Text></View>
+    </View>
     );
 
   }
