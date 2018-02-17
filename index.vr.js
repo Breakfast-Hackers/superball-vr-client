@@ -100,10 +100,10 @@ export default class HelloVRWorld extends React.Component {
 
        });
 
-       client.subscribe('/topic/game', message => {
-         console.log("start game");
-
-       });
+       client.subscribe('/topic/duration', (message) => {
+        const duration = JSON.parse(message.body)
+        self.setState({ time: milisecondstoSeconds(duration.duration) });
+      });
     });
 
   }

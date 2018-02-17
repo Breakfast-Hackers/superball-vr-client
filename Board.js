@@ -8,7 +8,6 @@ class Board extends React.Component {
   }
 
   render() {
-    console.log("rendering board" + this.props.time);
     return (<View>
       <Plane
         dimWidth={1}
