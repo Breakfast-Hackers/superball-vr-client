@@ -16,6 +16,8 @@ import Board from './Board.js';
 import Ball from './Ball.js';
 import Timer from './Timer.js';
 import Obstacle from './Obstacle.js';
+import Score from './Score.js';
+
 import DebugControls from './DebugControls.js';
 
 const Stomp = require('stompjs/lib/stomp.js').Stomp;
@@ -45,13 +47,27 @@ export default class HelloVRWorld extends React.Component {
   constructor(props) {
     super(props);
 
+    fetch('https://superball.herokuapp.com//api/highscores', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error(response.statusText);
+      }).then(json => {
+        this.setState({ scores: json.scores });
+      });
+
     this.state = {
       boardOffset: 0,
       currentBallPosition: 0,
       targetBallPosition: 0,
       obstacles: [],
       isGameRunning: false,
-      time: 0
+      time: 0,
+      scores: [0, 0, 0]
     }
 
     this.goLeft = this.goLeft.bind(this);
@@ -106,6 +122,13 @@ export default class HelloVRWorld extends React.Component {
         const duration = JSON.parse(message.body)
         self.setState({ time: milisecondstoSeconds(duration.duration) });
       });
+
+      client.subscribe('/topic/highscore', (message) => {
+        const highscore = JSON.parse(message.body)
+        self.setState({ scores: highscore.scores });
+        console.log('SCORES: ' + highscore.scores);
+      });
+
     });
 
   }
@@ -190,8 +213,8 @@ export default class HelloVRWorld extends React.Component {
     return (
       <Animated.View>
         <Pano source={asset('light-show.jpg')} />
-        <Board offset={this.state.boardOffset}/>
-
+        <Board offset={this.state.boardOffset} />
+        <Score scores={this.state.scores} />
         <Timer time={this.state.time} />
         <Ball position={this.state.currentBallPosition} />
         {obstacles}
@@ -215,6 +238,19 @@ function gameOver() {
     method: 'DELETE'
   })
     .then(response => response.json());
+}
+function initTopTenTest() {
+  var fakeScores = [0, 1, 2, 3, 4]
+
+  fetch('https://superball.herokuapp.com//api/highscores', {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' }
+  }).then((response) => {
+    throw new Error(response.statusText);
+  }).then(json => {
+    console.log("ACCEPTED STATUS: " + json.scores);
+  });
+  return fakeScores;
 }
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);
