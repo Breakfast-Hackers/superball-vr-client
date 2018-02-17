@@ -45,19 +45,22 @@ export default class HelloVRWorld extends React.Component {
     super(props);
 
     this.state = {
-      ballPosition: new Animated.Value(0),
-      obstacles: []
+      currentBallPosition: 0,
+      targetBallPosition: 0,
+      obstacles: [],
+      isGameRunning: false
     }
 
     this.goLeft = this.goLeft.bind(this);
     this.goRight = this.goRight.bind(this);
+    this.tick = this.tick.bind(this);
 
     let self = this;
 
     client.connect({}, frame => {
       console.log('connected: ' + frame);
 
-      client.subscribe('/topic/movements', function (message) {
+      client.subscribe('/topic/movements', message => {
     	   const movement = JSON.parse(message.body);
          console.log('movement: ' + movement.action);
 
@@ -71,70 +74,114 @@ export default class HelloVRWorld extends React.Component {
          }
        });
 
-      client.subscribe('/topic/commands', function (message) {
+      client.subscribe('/topic/commands', message => {
     	   const command = JSON.parse(message.body)
          console.log('command: ' + command.action);
+
+         if (command.action == 'start') {
+           self.setState({ isGameRunning: true });
+           self.tick();
+         }
        });
 
        client.subscribe('/topic/obstacles', message => {
+
+         if (!self.state.isGameRunning) {
+           return;
+         }
+
          let command = JSON.parse(message.body);
-         let obstacle = { positionX: command.position * 0.45, speed: 0.5, color: command.color };
-         var currentObstacles = this.state.obstacles;
+         let obstacle = { positionX: command.position * 0.45, positionY: 1.5, speed: 0.5, color: command.color };
+         var currentObstacles = self.state.obstacles;
          currentObstacles.push(obstacle);
-         this.setState({ obstacles: currentObstacles });
+         self.setState({ obstacles: currentObstacles });
+
+       });
+
+       client.subscribe('/topic/game', message => {
+         console.log("start game");
+
        });
     });
 
   }
 
   goLeft() {
-    Animated.timing(
-      this.state.ballPosition,
-      {
-        toValue: -0.45,
-        duration: 400
-      }
-    ).start();
+    this.setState({ targetBallPosition: -0.45 });
   }
 
   goRight() {
-    Animated.timing(
-      this.state.ballPosition,
-      {
-        toValue: 0.45,
-        duration: 400
-      }
-    ).start();
+    this.setState({ targetBallPosition: 0.45 });
   }
 
-  // componentDidMount() {
-  //   setTimeout(() => this.tick(), 10);
-  // }
-  //
-  // tick() {
-  //
-  //
-  //
-  //   setTimeout(() => this.tick(), 10);
-  // }
+  tick() {
+
+    var currentBallPosition = this.state.currentBallPosition;
+    var targetBallPosition = this.state.targetBallPosition;
+
+    if (targetBallPosition != null) {
+
+      if (currentBallPosition > targetBallPosition) {
+        currentBallPosition = Math.max(targetBallPosition, currentBallPosition - 0.02);
+      } else if (currentBallPosition < targetBallPosition) {
+        currentBallPosition = Math.min(targetBallPosition, currentBallPosition + 0.02);
+      } else {
+        targetBallPosition = null;
+      }
+    }
+
+    var collisionDetected = false;
+
+    let updatedObstacles = this.state.obstacles.map(obstacle => {
+      let updatedPositionY = obstacle.positionY -= 0.01;
+
+      if (updatedPositionY < -1.5) {
+        return null;
+      }
+
+      let ballMinX = currentBallPosition - 0.075;
+      let ballMaxX = currentBallPosition + 0.075;
+
+      let ballMinY = -0.075;
+      let ballMaxY = 0.075;
+
+      if ( obstacle.positionX >= ballMinX
+        && obstacle.positionX <= ballMaxX
+        && obstacle.positionY >= ballMinY
+        && obstacle.positionY <= ballMaxY) {
+        collisionDetected = true;
+      }
+
+      return { positionX: obstacle.positionX, positionY: updatedPositionY, speed: obstacle.speed, color: obstacle.color };
+    }).filter(obstacle => obstacle != null);
+
+    this.setState({ obstacles: updatedObstacles, currentBallPosition: currentBallPosition, targetBallPosition: targetBallPosition, isGameRunning: !collisionDetected });
+
+    if (!collisionDetected) {
+      setTimeout(() => this.tick(), 5);
+    } else {
+      alert("oh, oh, you lost");
+    }
+  }
 
   render() {
 
     let obstacles = this.state.obstacles.map((model, index) => {
-      return <Obstacle key={"Obstacle-" + index} positionX={model.positionX} speed={model.speed} color={model.color} />
+      return <Obstacle key={"Obstacle-" + index} positionX={model.positionX} positionY={model.positionY} speed={model.speed} color={model.color} />
     });
 
     return (
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
         <Board />
-        <Ball position={this.state.ballPosition} />
+        <Ball position={this.state.currentBallPosition} />
         {obstacles}
+        <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
       </Animated.View>
     );
   }
 };
 
-// <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
+//
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);

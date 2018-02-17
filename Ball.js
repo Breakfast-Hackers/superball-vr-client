@@ -11,7 +11,7 @@ class Ball extends React.Component {
   render() {
     return <Animated.View
       style={{
-        transform: [{ translate: [ 0, 0, -2.9] }, { translateX: this.props.position }]
+        transform: [{ translate: [ this.props.position, 0, -2.9] }]
       }} >
 
       <Sphere
@@ -19,7 +19,7 @@ class Ball extends React.Component {
         widthSegments={20}
         heightSegments={12}
         style={{
-          color: '#F00'
+          color: '#000'
         }}
       />
 
