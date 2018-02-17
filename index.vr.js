@@ -14,6 +14,7 @@ import {
 
 import Board from './Board.js';
 import Ball from './Ball.js';
+import Timer from './Timer.js';
 import Obstacle from './Obstacle.js';
 import DebugControls from './DebugControls.js';
 
@@ -48,7 +49,8 @@ export default class HelloVRWorld extends React.Component {
       currentBallPosition: 0,
       targetBallPosition: 0,
       obstacles: [],
-      isGameRunning: false
+      isGameRunning: false,
+      time: 0
     }
 
     this.goLeft = this.goLeft.bind(this);
@@ -64,11 +66,11 @@ export default class HelloVRWorld extends React.Component {
     	   const movement = JSON.parse(message.body);
          console.log('movement: ' + movement.action);
 
-         switch (movement.action) {
-           case 'links':
+        switch (movement.action) {
+          case 'links':
             self.goLeft();
             break;
-            case 'rechts':
+          case 'rechts':
             self.goRight();
             break;
          }
@@ -107,10 +109,19 @@ export default class HelloVRWorld extends React.Component {
   }
 
   goLeft() {
+    if (!this.state.isGameRunning) {
+      return;
+    }
+
     this.setState({ targetBallPosition: -0.45 });
   }
 
   goRight() {
+    if (!this.state.isGameRunning) {
+      return;
+    }
+
+
     this.setState({ targetBallPosition: 0.45 });
   }
 
@@ -174,14 +185,23 @@ export default class HelloVRWorld extends React.Component {
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
         <Board />
+
+        <Timer time={this.state.time} />
         <Ball position={this.state.currentBallPosition} />
         {obstacles}
+
         <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
       </Animated.View>
     );
   }
 };
 
-//
+function milisecondstoSeconds(miliseconds) {
+  if ((miliseconds != undefined) && (miliseconds >= 0)) {
+    var seconds = ((miliseconds % 60000) / 1000).toFixed(0);
+    var minutes = Math.floor(miliseconds / 60000);
+    return (seconds == 60 ? (minutes + 1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
+  }
+}
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);
