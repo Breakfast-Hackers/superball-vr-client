@@ -245,18 +245,5 @@ function gameOver() {
   })
     .then(response => response.json());
 }
-function initTopTenTest() {
-  var fakeScores = [0, 1, 2, 3, 4]
-
-  fetch('https://superball.herokuapp.com//api/highscores', {
-    method: 'GET',
-    headers: { 'Accept': 'application/json' }
-  }).then((response) => {
-    throw new Error(response.statusText);
-  }).then(json => {
-    console.log("ACCEPTED STATUS: " + json.scores);
-  });
-  return fakeScores;
-}
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);
