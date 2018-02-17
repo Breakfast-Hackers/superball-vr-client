@@ -187,7 +187,7 @@ export default class HelloVRWorld extends React.Component {
 
     return (
       <Animated.View>
-        <Pano source={asset('chess-world.jpg')} />
+        <Pano source={asset('light-show.jpg')} />
         <Board offset={this.state.boardOffset}/>
 
         <Timer time={this.state.time} />

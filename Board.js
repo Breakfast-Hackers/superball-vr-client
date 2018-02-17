@@ -16,11 +16,10 @@ class Board extends React.Component {
 
   render() {
     return (<View>
-
       <Plane
         dimWidth={1}
-        dimHeight={30}
-        texture={{...asset('board.png'), repeat: [1, 20] }}
+        dimHeight={200}
+        texture={{...asset('board.png'), repeat: [1, 200] }}
         style={{
           color: '#FFF',
           transform: [{ translate: [0, 0 + this.props.offset, -3] }]
