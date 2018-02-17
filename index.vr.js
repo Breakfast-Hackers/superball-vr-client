@@ -82,6 +82,7 @@ export default class HelloVRWorld extends React.Component {
         console.log('command: ' + command.action);
 
         if (command.action == 'start') {
+          self.setState({ obstacles: [] })
           self.setState({ isGameRunning: true });
           self.tick();
         }
