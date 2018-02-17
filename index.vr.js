@@ -11,7 +11,11 @@ import {
   Animated,
   VrButton
 } from 'react-vr';
-//import Board from './Board.js';
+
+import Board from './Board.js';
+import Ball from './Ball.js';
+import Obstacle from './Obstacle.js';
+import DebugControls from './DebugControls.js';
 
 const Stomp = require('stompjs/lib/stomp.js').Stomp;
 
@@ -39,11 +43,14 @@ export default class HelloVRWorld extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       ballPosition: new Animated.Value(0)
     }
 
+
     this.goLeft = this.goLeft.bind(this);
+    this.goRight = this.goRight.bind(this);
 
     let self = this;
 
@@ -98,63 +105,13 @@ export default class HelloVRWorld extends React.Component {
     return (
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
-
-         <Plane
-            dimWidth={1}
-            dimHeight={3}
-            style={{
-              color: '#FF0',
-              transform: [{translate: [0, 0, -3]}]
-            }}
-          />
-
-          <Sphere
-            radius={0.05}
-            widthSegments={20}
-            heightSegments={12}
-            style={{
-              color: '#00F',
-              transform: [{ translate: [ 0, 1, -3] }]
-            }}
-          />
-
-        <Animated.View
-          style={{
-            transform: [{ translate: [ 0, 0, -2.9] }, { translateX: this.state.ballPosition }]
-          }} >
-
-          <Sphere
-            radius={0.05}
-            widthSegments={20}
-            heightSegments={12}
-            style={{
-              color: '#F00'
-            }}
-          />
-
-        </Animated.View>
-
-          <VrButton onClick={() => this.goLeft() } ><Text style={{
-            fontSize: 0.1,
-            textAlignVertical: 'center',
-            transform: [{translate: [0, 0, -1.5]}]
-          }} onInput={() => {}}>
-          Go Left
-          </Text></VrButton>
-
-          <VrButton onClick={() => this.goRight() } ><Text style={{
-            fontSize: 0.1,
-            textAlignVertical: 'center',
-            transform: [{translate: [0, 0, -1.5]}]
-          }} onInput={() => {}}>
-          Go Right
-          </Text></VrButton>
-
+        <Board />
+        <Ball position={this.state.ballPosition} />
+        <Obstacle />
+        <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
       </Animated.View>
     );
   }
 };
-
-// , -1.9
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);
