@@ -64,8 +64,8 @@ export default class HelloVRWorld extends React.Component {
       console.log('connected: ' + frame);
 
       client.subscribe('/topic/movements', message => {
-    	   const movement = JSON.parse(message.body);
-         console.log('movement: ' + movement.action);
+        const movement = JSON.parse(message.body);
+        console.log('movement: ' + movement.action);
 
         switch (movement.action) {
           case 'links':
@@ -74,34 +74,35 @@ export default class HelloVRWorld extends React.Component {
           case 'rechts':
             self.goRight();
             break;
-         }
-       });
+        }
+      });
 
       client.subscribe('/topic/commands', message => {
-    	   const command = JSON.parse(message.body)
-         console.log('command: ' + command.action);
+        const command = JSON.parse(message.body)
+        console.log('command: ' + command.action);
 
-         if (command.action == 'start') {
-           self.setState({ isGameRunning: true });
-           self.tick();
-         }
-       });
+        if (command.action == 'start') {
+          self.setState({ obstacles: [] })
+          self.setState({ isGameRunning: true });
+          self.tick();
+        }
+      });
 
-       client.subscribe('/topic/obstacles', message => {
+      client.subscribe('/topic/obstacles', message => {
 
-         if (!self.state.isGameRunning) {
-           return;
-         }
+        if (!self.state.isGameRunning) {
+          return;
+        }
 
-         let command = JSON.parse(message.body);
-         let obstacle = { positionX: command.position * 0.45, positionY: 1.5, speed: 0.5, color: command.color };
-         var currentObstacles = self.state.obstacles;
-         currentObstacles.push(obstacle);
-         self.setState({ obstacles: currentObstacles });
+        let command = JSON.parse(message.body);
+        let obstacle = { positionX: command.position * 0.45, positionY: 1.5, speed: 0.5, color: command.color };
+        var currentObstacles = self.state.obstacles;
+        currentObstacles.push(obstacle);
+        self.setState({ obstacles: currentObstacles });
 
-       });
+      });
 
-       client.subscribe('/topic/duration', (message) => {
+      client.subscribe('/topic/duration', (message) => {
         const duration = JSON.parse(message.body)
         self.setState({ time: milisecondstoSeconds(duration.duration) });
       });
@@ -160,7 +161,7 @@ export default class HelloVRWorld extends React.Component {
       let ballMinY = -0.075;
       let ballMaxY = 0.075;
 
-      if ( obstacle.positionX >= ballMinX
+      if (obstacle.positionX >= ballMinX
         && obstacle.positionX <= ballMaxX
         && obstacle.positionY >= ballMinY
         && obstacle.positionY <= ballMaxY) {
@@ -175,7 +176,8 @@ export default class HelloVRWorld extends React.Component {
     if (!collisionDetected) {
       setTimeout(() => this.tick(), 5);
     } else {
-      alert("oh, oh, you lost");
+      console.log("oh, oh, you lost");
+      gameOver();
     }
   }
 
@@ -206,6 +208,13 @@ function milisecondstoSeconds(miliseconds) {
     var minutes = Math.floor(miliseconds / 60000);
     return (seconds == 60 ? (minutes + 1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
   }
+}
+function gameOver() {
+  var url = 'https://superball.herokuapp.com/api/game';
+  fetch(url, {
+    method: 'DELETE'
+  })
+    .then(response => response.json());
 }
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);
