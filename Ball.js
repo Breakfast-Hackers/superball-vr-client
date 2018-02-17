@@ -19,7 +19,7 @@ class Ball extends React.Component {
         widthSegments={20}
         heightSegments={12}
         style={{
-          color: '#000'
+          color: '#FF0'
         }}
       />
 

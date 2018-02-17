@@ -46,6 +46,7 @@ export default class HelloVRWorld extends React.Component {
     super(props);
 
     this.state = {
+      boardOffset: 0,
       currentBallPosition: 0,
       targetBallPosition: 0,
       obstacles: [],
@@ -127,8 +128,11 @@ export default class HelloVRWorld extends React.Component {
 
   tick() {
 
+    var boardOffset = this.state.boardOffset;
     var currentBallPosition = this.state.currentBallPosition;
     var targetBallPosition = this.state.targetBallPosition;
+
+    boardOffset -= 0.001;
 
     if (targetBallPosition != null) {
 
@@ -166,7 +170,7 @@ export default class HelloVRWorld extends React.Component {
       return { positionX: obstacle.positionX, positionY: updatedPositionY, speed: obstacle.speed, color: obstacle.color };
     }).filter(obstacle => obstacle != null);
 
-    this.setState({ obstacles: updatedObstacles, currentBallPosition: currentBallPosition, targetBallPosition: targetBallPosition, isGameRunning: !collisionDetected });
+    this.setState({ boardOffset: boardOffset, obstacles: updatedObstacles, currentBallPosition: currentBallPosition, targetBallPosition: targetBallPosition, isGameRunning: !collisionDetected });
 
     if (!collisionDetected) {
       setTimeout(() => this.tick(), 5);
@@ -184,7 +188,7 @@ export default class HelloVRWorld extends React.Component {
     return (
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
-        <Board />
+        <Board offset={this.state.boardOffset}/>
 
         <Timer time={this.state.time} />
         <Ball position={this.state.currentBallPosition} />
