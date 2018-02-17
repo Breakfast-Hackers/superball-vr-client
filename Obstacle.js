@@ -30,6 +30,7 @@ class Obstacle extends React.Component {
         radius={0.05}
         widthSegments={20}
         heightSegments={12}
+        lit={true}
         style={{
           color: this.props.color
         }}

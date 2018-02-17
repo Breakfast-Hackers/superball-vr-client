@@ -9,7 +9,8 @@ import {
   Plane,
   Sphere,
   Animated,
-  VrButton
+  VrButton,
+  PointLight
 } from 'react-vr';
 
 import Board from './Board.js';
@@ -65,16 +66,9 @@ export default class HelloVRWorld extends React.Component {
 
       client.subscribe('/topic/movements', message => {
         const movement = JSON.parse(message.body);
-        console.log('movement: ' + movement.action);
+        const position = movement.position;
 
-        switch (movement.action) {
-          case 'links':
-            self.goLeft();
-            break;
-          case 'rechts':
-            self.goRight();
-            break;
-        }
+        self.setState({ targetBallPosition: position * 0.4 })
       });
 
       client.subscribe('/topic/commands', message => {
@@ -82,6 +76,7 @@ export default class HelloVRWorld extends React.Component {
         console.log('command: ' + command.action);
 
         if (command.action == 'start') {
+          self.getStartPosition();
           self.setState({ obstacles: [] })
           self.setState({ isGameRunning: true });
           self.tick();
@@ -108,6 +103,15 @@ export default class HelloVRWorld extends React.Component {
       });
     });
 
+  }
+
+  getStartPosition() {
+    fetch('https://superball.herokuapp.com/api/position', { headers: { 'Accept': 'application/json' } })
+      .then(response => response.json())
+      .then(json => {
+        this.setState({targetBallPosition: json.position * 0.4})
+      })
+      .catch(error => console.log('failed to fetch current position: ' + error));
   }
 
   goLeft() {
@@ -196,7 +200,9 @@ export default class HelloVRWorld extends React.Component {
         <Ball position={this.state.currentBallPosition} />
         {obstacles}
 
-        <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
+        {false && <DebugControls onLeft={this.goLeft} onRight={this.goRight} />}
+
+        <PointLight />
       </Animated.View>
     );
   }
