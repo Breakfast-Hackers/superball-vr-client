@@ -13,23 +13,27 @@ import {
 } from 'react-vr';
 //import Board from './Board.js';
 
-const webSocket = new window.WebSocket('wss://superball.herokuapp.com/superball-websocket');
+const Stomp = require('stompjs/lib/stomp.js').Stomp;
 
-webSocket.onopen = () => {
-  console.log('websocket opened');
-};
+const client = Stomp.client('wss://superball.herokuapp.com/superball-websocket/websocket');
 
-webSocket.onmessage = event => {
-  console.log('received event: ' + event);
-};
-
-webSocket.onerror = error => {
-  console.log('error received on socket: ' + error.message);
-};
-
-webSocket.onclose = event => {
-  console.log('websocket closed');
-};
+// const webSocket = new window.WebSocket('wss://superball.herokuapp.com/superball-websocket/websocket');
+//
+// webSocket.onopen = () => {
+//   console.log('websocket opened');
+// };
+//
+// webSocket.onmessage = event => {
+//   console.log('received event: ' + event);
+// };
+//
+// webSocket.onerror = error => {
+//   console.log('error received on socket: ' + error.message);
+// };
+//
+// webSocket.onclose = event => {
+//   console.log('websocket closed');
+// };
 
 export default class HelloVRWorld extends React.Component {
 
@@ -40,6 +44,34 @@ export default class HelloVRWorld extends React.Component {
     }
 
     this.goLeft = this.goLeft.bind(this);
+
+    let self = this;
+
+    client.connect({}, frame => {
+      console.log('connected: ' + frame);
+
+      client.subscribe('/topic/movements', function (message) {
+    	   const movement = JSON.parse(message.body);
+         console.log('movement: ' + movement.action);
+
+         switch (movement.action) {
+           case 'links':
+            self.goLeft();
+            break;
+            case 'rechts':
+            self.goRight();
+            break;
+         }
+
+
+       });
+
+      client.subscribe('/topic/commands', function (message) {
+    	   const command = JSON.parse(message.body)
+         console.log('command: ' + command.action);
+       });
+    });
+
   }
 
   goLeft() {
@@ -63,32 +95,32 @@ export default class HelloVRWorld extends React.Component {
   }
 
   render() {
-    console.log('ballPosition: ' + this.state.ballPosition);
-
     return (
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
-        <Text style={{
-            fontSize: 0.8,
-            layoutOrigin: [0.5, 0.5],
-            paddingLeft: 0.2,
-            paddingRight: 0.2,
-            textAlign: 'center',
-            textAlignVertical: 'center',
-            transform: [{translate: [0, 0, -3]}]
-         }}>Foo</Text>
+
          <Plane
             dimWidth={1}
-            dimHeight={4}
+            dimHeight={3}
             style={{
               color: '#FF0',
-              transform: [{translate: [0, 0, -2]}]
+              transform: [{translate: [0, 0, -3]}]
+            }}
+          />
+
+          <Sphere
+            radius={0.05}
+            widthSegments={20}
+            heightSegments={12}
+            style={{
+              color: '#00F',
+              transform: [{ translate: [ 0, 1, -3] }]
             }}
           />
 
         <Animated.View
           style={{
-            transform: [{ translate: [0, 0, -1.9] }, { translateX: this.state.ballPosition }]
+            transform: [{ translate: [ 0, 0, -2.9] }, { translateX: this.state.ballPosition }]
           }} >
 
           <Sphere
@@ -101,8 +133,6 @@ export default class HelloVRWorld extends React.Component {
           />
 
         </Animated.View>
-
-
 
           <VrButton onClick={() => this.goLeft() } ><Text style={{
             fontSize: 0.1,
