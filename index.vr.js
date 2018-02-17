@@ -45,7 +45,8 @@ export default class HelloVRWorld extends React.Component {
     super(props);
 
     this.state = {
-      ballPosition: new Animated.Value(0)
+      ballPosition: new Animated.Value(0),
+      time: 0
     }
 
 
@@ -58,25 +59,32 @@ export default class HelloVRWorld extends React.Component {
       console.log('connected: ' + frame);
 
       client.subscribe('/topic/movements', function (message) {
-    	   const movement = JSON.parse(message.body);
-         console.log('movement: ' + movement.action);
+        const movement = JSON.parse(message.body);
+        console.log('movement: ' + movement.action);
 
-         switch (movement.action) {
-           case 'links':
+        switch (movement.action) {
+          case 'links':
             self.goLeft();
             break;
-            case 'rechts':
+          case 'rechts':
             self.goRight();
             break;
-         }
+        }
 
 
-       });
+      });
 
       client.subscribe('/topic/commands', function (message) {
-    	   const command = JSON.parse(message.body)
-         console.log('command: ' + command.action);
-       });
+        const command = JSON.parse(message.body)
+        console.log('command: ' + command.action);
+      });
+
+      client.subscribe('/topic/duration', (message) => {
+        const duration = JSON.parse(message.body)
+        console.log('Timer update: ' + duration.duration);
+        this.setState({ time: milisecondstoSeconds(duration.duration) });
+      });
+
     });
 
   }
@@ -105,7 +113,7 @@ export default class HelloVRWorld extends React.Component {
     return (
       <Animated.View>
         <Pano source={asset('chess-world.jpg')} />
-        <Board />
+        <Board time={this.state.time} />
         <Ball position={this.state.ballPosition} />
         <Obstacle />
         <DebugControls onLeft={this.goLeft} onRight={this.goRight} />
@@ -113,5 +121,11 @@ export default class HelloVRWorld extends React.Component {
     );
   }
 };
-
+function milisecondstoSeconds(miliseconds) {
+  if ((miliseconds != undefined) && (miliseconds >= 0)) {
+    var seconds = ((miliseconds % 60000) / 1000).toFixed(0);
+    var minutes = Math.floor(miliseconds / 60000);
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+  }
+}
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);
