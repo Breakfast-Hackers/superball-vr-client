@@ -1,4 +1,5 @@
 import React from 'react';
+import { Easing } from 'react-native';
 import { Animated, View, Sphere, asset } from 'react-vr';
 
 class Ball extends React.Component {
@@ -8,23 +9,23 @@ class Ball extends React.Component {
     this.state = {
       rotationAngle: new Animated.Value(0)
     };
-
-
-    console.log("init ball, animate: " + props.animate);
-  }
-
-  componentDidMount() {
-    if (!this.props.animate) {
-      return;
-    }
-
-    Animated.timing(this.state.rotationAngle, {
-      toValue: -360 * 1000,
-      duration: 400 * 1000
-    }).start();
   }
 
   render() {
+
+    if (this.props.animate && this.animation == null) {
+      var animation = Animated.timing(this.state.rotationAngle, {
+        toValue: -360 * 1000,
+        duration: 400 * 1000,
+        easing: Easing.linear
+      });
+      this.animation = animation;
+      animation.start()
+    } else if (!this.props.animate && this.animation != null) {
+      this.animation.stop();
+      this.animation = null;
+    }
+
     return <Animated.View
       style={{
         transform: [{ translate: [ this.props.position, 0, -2.9] }, { rotateX: this.state.rotationAngle.interpolate({

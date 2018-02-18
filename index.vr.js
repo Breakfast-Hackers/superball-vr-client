@@ -24,6 +24,7 @@ import DebugControls from './DebugControls.js';
 const Stomp = require('stompjs/lib/stomp.js').Stomp;
 
 const client = Stomp.client('wss://superball.herokuapp.com/superball-websocket/websocket');
+client.debug = message => {};
 
 export default class HelloVRWorld extends React.Component {
 
@@ -146,7 +147,7 @@ export default class HelloVRWorld extends React.Component {
     let updatedObstacles = this.state.obstacles.map(obstacle => {
       let updatedPositionY = obstacle.positionY -= 0.01;
 
-      if (updatedPositionY < -1.5) {
+      if (updatedPositionY < -0.5) {
         return null;
       }
 
@@ -160,13 +161,19 @@ export default class HelloVRWorld extends React.Component {
         && obstacle.positionX <= ballMaxX
         && obstacle.positionY >= ballMinY
         && obstacle.positionY <= ballMaxY) {
-        collisionDetected = true;
+          collisionDetected = true;
       }
 
       return { positionX: obstacle.positionX, positionY: updatedPositionY, speed: obstacle.speed, color: obstacle.color };
     }).filter(obstacle => obstacle != null);
 
-    this.setState({ boardOffset: boardOffset, obstacles: updatedObstacles, currentBallPosition: currentBallPosition, targetBallPosition: targetBallPosition, isGameRunning: !collisionDetected });
+    this.setState({
+      boardOffset: boardOffset,
+      obstacles: updatedObstacles,
+      currentBallPosition: currentBallPosition,
+      targetBallPosition: targetBallPosition,
+      isGameRunning: !collisionDetected
+    });
 
     if (!collisionDetected) {
       setTimeout(() => this.tick(), 5);
