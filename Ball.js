@@ -11,6 +11,10 @@ class Ball extends React.Component {
   }
 
   componentDidMount() {
+    if (!this.props.animate) {
+      return;
+    }
+
     Animated.timing(this.state.rotationAngle, {
       toValue: -360 * 1000,
       duration: 400 * 1000
@@ -21,7 +25,7 @@ class Ball extends React.Component {
     return <Animated.View
       style={{
         transform: [{ translate: [ this.props.position, 0, -2.9] }, { rotateX: this.state.rotationAngle.interpolate({
-                  inputRange: [0, 360],
+                  inputRange: [0, -360],
                   outputRange: ['0deg', '360deg']
                 })}]
       }} >

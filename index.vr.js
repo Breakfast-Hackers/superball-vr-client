@@ -211,7 +211,7 @@ export default class HelloVRWorld extends React.Component {
   render() {
 
     let obstacles = this.state.obstacles.map((model, index) => {
-      return <Obstacle key={"Obstacle-" + index} positionX={model.positionX} positionY={model.positionY} speed={model.speed} color={model.color} />
+      return <Obstacle key={"Obstacle-" + index} positionX={model.positionX} positionY={model.positionY} speed={model.speed} color={model.color} animate={this.state.isGameRunning} />
     });
 
     return (
@@ -220,12 +220,12 @@ export default class HelloVRWorld extends React.Component {
         <Board offset={this.state.boardOffset} />
         <Score scores={this.state.scores} />
         <Timer time={this.state.time} />
-        <Ball position={this.state.currentBallPosition} />
+        <Ball position={this.state.currentBallPosition} animate={this.state.isGameRunning} />
         {obstacles}
 
         {false && <DebugControls onLeft={this.goLeft} onRight={this.goRight} />}
-
         <PointLight />
+
       </Animated.View>
     );
   }
@@ -245,6 +245,7 @@ function gameOver() {
   })
     .then(response => response.json());
 }
+
 function initTopTenTest() {
   var fakeScores = [0, 1, 2, 3, 4]
 
