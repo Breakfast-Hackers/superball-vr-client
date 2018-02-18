@@ -18,7 +18,8 @@ class Obstacle extends React.Component {
 
     Animated.timing(this.state.rotationAngle, {
       toValue: 360 * 1000,
-      duration: 400 * 1000
+      duration: 400 * 1000,
+      ease: Easing.linear
     }).start();
   }
 

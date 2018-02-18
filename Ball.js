@@ -8,6 +8,9 @@ class Ball extends React.Component {
     this.state = {
       rotationAngle: new Animated.Value(0)
     };
+
+
+    console.log("init ball, animate: " + props.animate);
   }
 
   componentDidMount() {
@@ -25,7 +28,7 @@ class Ball extends React.Component {
     return <Animated.View
       style={{
         transform: [{ translate: [ this.props.position, 0, -2.9] }, { rotateX: this.state.rotationAngle.interpolate({
-                  inputRange: [0, -360],
+                  inputRange: [0, 360],
                   outputRange: ['0deg', '360deg']
                 })}]
       }} >

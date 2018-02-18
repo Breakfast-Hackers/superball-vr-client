@@ -25,41 +25,10 @@ const Stomp = require('stompjs/lib/stomp.js').Stomp;
 
 const client = Stomp.client('wss://superball.herokuapp.com/superball-websocket/websocket');
 
-// const webSocket = new window.WebSocket('wss://superball.herokuapp.com/superball-websocket/websocket');
-//
-// webSocket.onopen = () => {
-//   console.log('websocket opened');
-// };
-//
-// webSocket.onmessage = event => {
-//   console.log('received event: ' + event);
-// };
-//
-// webSocket.onerror = error => {
-//   console.log('error received on socket: ' + error.message);
-// };
-//
-// webSocket.onclose = event => {
-//   console.log('websocket closed');
-// };
-
 export default class HelloVRWorld extends React.Component {
 
   constructor(props) {
     super(props);
-
-    fetch('https://superball.herokuapp.com//api/highscores', {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error(response.statusText);
-      }).then(json => {
-        this.setState({ scores: json.scores });
-      });
 
     this.state = {
       boardOffset: 0,
@@ -71,8 +40,6 @@ export default class HelloVRWorld extends React.Component {
       scores: [0, 0, 0]
     }
 
-    this.goLeft = this.goLeft.bind(this);
-    this.goRight = this.goRight.bind(this);
     this.tick = this.tick.bind(this);
 
     let self = this;
@@ -92,10 +59,11 @@ export default class HelloVRWorld extends React.Component {
         console.log('command: ' + command.action);
 
         if (command.action == 'start') {
-          self.getStartPosition();
-          self.setState({ obstacles: [] })
-          self.setState({ isGameRunning: true });
-          self.tick();
+          self.getStartPosition()
+            .then(position => {
+              self.setState({ obstacles: [], isGameRunning: true, targetBallPosition: position, currentBallPosition: position });
+              self.tick();
+            });
         }
       });
 
@@ -128,30 +96,30 @@ export default class HelloVRWorld extends React.Component {
 
   }
 
+  componentDidMount() {
+    fetch('https://superball.herokuapp.com//api/highscores', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error(response.statusText);
+      }).then(json => {
+        this.setState({ scores: json.scores });
+      });
+  }
+
   getStartPosition() {
-    fetch('https://superball.herokuapp.com/api/position', { headers: { 'Accept': 'application/json' } })
-      .then(response => response.json())
-      .then(json => {
-        this.setState({targetBallPosition: json.position * 0.4})
-      })
-      .catch(error => console.log('failed to fetch current position: ' + error));
-  }
-
-  goLeft() {
-    if (!this.state.isGameRunning) {
-      return;
-    }
-
-    this.setState({ targetBallPosition: -0.45 });
-  }
-
-  goRight() {
-    if (!this.state.isGameRunning) {
-      return;
-    }
-
-
-    this.setState({ targetBallPosition: 0.45 });
+    return new Promise((resolve, reject) => {
+      fetch('https://superball.herokuapp.com/api/position', { headers: { 'Accept': 'application/json' } })
+        .then(response => response.json())
+        .then(json => {
+          resolve(json.position * 0.4);
+        })
+        .catch(error => reject(error));
+    });
   }
 
   tick() {
@@ -222,10 +190,7 @@ export default class HelloVRWorld extends React.Component {
         <Timer time={this.state.time} />
         <Ball position={this.state.currentBallPosition} animate={this.state.isGameRunning} />
         {obstacles}
-
-        {false && <DebugControls onLeft={this.goLeft} onRight={this.goRight} />}
         <PointLight />
-
       </Animated.View>
     );
   }
@@ -244,20 +209,6 @@ function gameOver() {
     method: 'DELETE'
   })
     .then(response => response.json());
-}
-
-function initTopTenTest() {
-  var fakeScores = [0, 1, 2, 3, 4]
-
-  fetch('https://superball.herokuapp.com//api/highscores', {
-    method: 'GET',
-    headers: { 'Accept': 'application/json' }
-  }).then((response) => {
-    throw new Error(response.statusText);
-  }).then(json => {
-    console.log("ACCEPTED STATUS: " + json.scores);
-  });
-  return fakeScores;
 }
 
 AppRegistry.registerComponent('HelloVRWorld', () => HelloVRWorld);

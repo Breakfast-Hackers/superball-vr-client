@@ -7,7 +7,6 @@ class Timer extends React.Component {
     }
 
     render() {
-        console.log("rendering board" + this.props.time);
         return (<View style={{ flexDirection: 'row' }}>
             <Plane
                 dimWidth={0.9}
