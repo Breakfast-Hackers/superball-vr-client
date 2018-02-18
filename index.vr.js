@@ -26,6 +26,8 @@ const Stomp = require('stompjs/lib/stomp.js').Stomp;
 const client = Stomp.client('wss://superball.herokuapp.com/superball-websocket/websocket');
 client.debug = message => {};
 
+const radius = 0.075;
+
 export default class HelloVRWorld extends React.Component {
 
   constructor(props) {
@@ -38,7 +40,7 @@ export default class HelloVRWorld extends React.Component {
       obstacles: [],
       isGameRunning: false,
       time: 0,
-      scores: [0, 0, 0]
+      scores: []
     }
 
     this.tick = this.tick.bind(this);
@@ -98,7 +100,8 @@ export default class HelloVRWorld extends React.Component {
   }
 
   componentDidMount() {
-    fetch('https://superball.herokuapp.com//api/highscores', {
+    var self = this;
+    fetch('https://superball.herokuapp.com/api/highscores', {
       method: 'GET',
       headers: { 'Accept': 'application/json' }
     })
@@ -108,7 +111,7 @@ export default class HelloVRWorld extends React.Component {
         }
         throw new Error(response.statusText);
       }).then(json => {
-        this.setState({ scores: json.scores });
+        self.setState({ scores: json.scores });
       });
   }
 
@@ -151,11 +154,11 @@ export default class HelloVRWorld extends React.Component {
         return null;
       }
 
-      let ballMinX = currentBallPosition - 0.075;
-      let ballMaxX = currentBallPosition + 0.075;
+      let ballMinX = currentBallPosition - radius * 2;
+      let ballMaxX = currentBallPosition + radius;
 
-      let ballMinY = -0.075;
-      let ballMaxY = 0.075;
+      let ballMinY = -radius * 2;
+      let ballMaxY = radius * 2;
 
       if (obstacle.positionX >= ballMinX
         && obstacle.positionX <= ballMaxX
@@ -186,7 +189,7 @@ export default class HelloVRWorld extends React.Component {
   render() {
 
     let obstacles = this.state.obstacles.map((model, index) => {
-      return <Obstacle key={"Obstacle-" + index} positionX={model.positionX} positionY={model.positionY} speed={model.speed} color={model.color} animate={this.state.isGameRunning} />
+      return <Obstacle key={"Obstacle-" + index} radius={radius} positionX={model.positionX} positionY={model.positionY} speed={model.speed} color={model.color} animate={this.state.isGameRunning} />
     });
 
     return (
@@ -195,7 +198,7 @@ export default class HelloVRWorld extends React.Component {
         <Board offset={this.state.boardOffset} />
         <Score scores={this.state.scores} />
         <Timer time={this.state.time} />
-        <Ball position={this.state.currentBallPosition} animate={this.state.isGameRunning} />
+        <Ball radius={radius} position={this.state.currentBallPosition} animate={this.state.isGameRunning} />
         {obstacles}
         <PointLight />
       </Animated.View>

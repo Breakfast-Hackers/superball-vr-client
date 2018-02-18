@@ -8,8 +8,14 @@ class Score extends React.Component {
     }
     render() {
 
-        var text = this.props.scores;
-        var scores = text.sort(function (a, b) { return b - a });
+        var linesOfScore = "";
+        if (this.props.scores) {
+          linesOfScore = this.props.scores.map(score => {
+            return milisecondsToseconds(score);
+          }).join('\n');
+        }
+
+        // var scores = text.sort(function (a, b) { return b - a });
 
         return (<View>
             <Plane
@@ -29,7 +35,7 @@ class Score extends React.Component {
                 flex: 1,
                 width: 3,
                 color: '#ffff1a',
-                transform: [{ translate: [-2.6, 2, -3] }]
+                transform: [{ translate: [-2.75, 2, -3] }]
             }} >
                 Best time
             </Text>
@@ -42,29 +48,11 @@ class Score extends React.Component {
                 alignItems: 'stretch',
                 fontSize: 0.3,
                 color: '#fff',
-                transform: [{ translate: [-2.5, 1.6, -3] }]
+                transform: [{ translate: [-2.75, 1.6, -3] }]
             }}>
-                {milisecondsToseconds(scores[0])}
-                {"\n"}
-                {milisecondsToseconds(scores[1])}
-                {"\n"}
-                {milisecondsToseconds(scores[2])}
-                {"\n"}
-                {milisecondsToseconds(scores[3])}
-                {"\n"}
-                {milisecondsToseconds(scores[4])}
-                {"\n"}
-                {milisecondsToseconds(scores[5])}
-                {"\n"}
-                {milisecondsToseconds(scores[6])}
-                {"\n"}
-                {milisecondsToseconds(scores[7])}
-                {"\n"}
-                {milisecondsToseconds(scores[8])}
-                {"\n"}
-                {milisecondsToseconds(scores[9])}
+              {linesOfScore}
             </Text>
-        </View >);
+        </View>);
     }
 
 }

@@ -35,9 +35,9 @@ class Ball extends React.Component {
       }} >
 
       <Sphere
-        radius={0.05}
-        widthSegments={20}
-        heightSegments={12}
+        radius={this.props.radius}
+        widthSegments={32}
+        heightSegments={32}
         lit={true}
         texture={{...asset('ball.png')}}
         style={{

@@ -31,9 +31,9 @@ class Obstacle extends React.Component {
               outputRange: ['0deg', '360deg']
             })}]}}>
        <Sphere
-        radius={0.05}
-        widthSegments={20}
-        heightSegments={12}
+        radius={this.props.radius}
+        widthSegments={32}
+        heightSegments={32}
         lit={true}
         texture={{...asset('obstacle.png')}}
         style={{
